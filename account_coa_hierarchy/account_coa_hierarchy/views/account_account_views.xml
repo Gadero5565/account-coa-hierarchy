@@ -4,16 +4,14 @@
         <field name="name">account.account.hierarchy.by.type</field>
         <field name="model">account.account</field>
         <field name="arch" type="xml">
-            <hierarchy
-                    parent_field="coa_hierarchy_parent_id"
-                    js_class="account_coa_hierarchy_native"
-                    icon="fa-sitemap"
-                    draggable="0"
-                    create="0"
-                    edit="0"
-                    delete="0"
-                    default_order="code, placeholder_code"
-            >
+            <hierarchy parent_field="coa_hierarchy_parent_id"
+                       js_class="account_coa_hierarchy_native"
+                       icon="fa-sitemap"
+                       draggable="0"
+                       create="0"
+                       edit="0"
+                       delete="0"
+                       default_order="code, placeholder_code">
                 <field name="name"/>
                 <field name="code"/>
                 <field name="placeholder_code" invisible="1"/>

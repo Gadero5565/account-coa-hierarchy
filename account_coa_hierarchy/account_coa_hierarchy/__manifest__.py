@@ -8,6 +8,7 @@
         "Accounts are grouped by account type while preserving Odoo's "
         "standard Chart of Accounts behavior."
     ),
+    "author": "Gadeer Mahmoud",
     "depends": ["account", "web_hierarchy"],
     "data": [
         "views/account_account_views.xml",
