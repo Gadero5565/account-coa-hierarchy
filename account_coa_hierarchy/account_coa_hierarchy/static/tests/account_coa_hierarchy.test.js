@@ -1,62 +1,64 @@
 /** @odoo-module **/
 
-import { defineMailModels } from "@mail/../tests/mail_test_helpers";
-import { describe, expect, test } from "@odoo/hoot";
 import {
-    contains,
-    defineModels,
-    fields,
-    models,
-    mountView,
-    toggleMenuItem,
-    toggleSearchBarMenu,
-} from "@web/../tests/web_test_helpers";
+    click,
+    getFixture,
+    nextTick,
+} from "@web/../tests/helpers/utils";
+import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 
 import "../src/views/account_coa_hierarchy/account_coa_hierarchy_view";
 
+let serverData;
+let target;
 
-class Account extends models.Model {
-    _name = "account.account";
+const hierarchyArch = `
+    <hierarchy
+        parent_field="coa_hierarchy_parent_id"
+        js_class="account_coa_hierarchy_native"
+        draggable="0"
+        create="0"
+        edit="0"
+        delete="0"
+    >
+        <field name="name"/>
+        <field name="code"/>
+        <field name="account_type"/>
+        <field name="coa_hierarchy_parent_id"/>
+        <field name="coa_hierarchy_is_type_node"/>
+        <field name="coa_hierarchy_account_count"/>
 
-    name = fields.Char();
-    code = fields.Char();
-    placeholder_code = fields.Char();
-    account_type = fields.Char();
-    deprecated = fields.Boolean();
+        <templates>
+            <t t-name="hierarchy-box">
+                <t t-if="record.coa_hierarchy_is_type_node.raw_value">
+                    <div class="o_coa_hierarchy_type_card">
+                        <field name="account_type"/>
+                    </div>
+                </t>
 
-    coa_hierarchy_parent_id = fields.Many2one({
-        relation: "account.account",
-    });
+                <t t-else="">
+                    <div class="o_coa_hierarchy_account_card">
+                        <div class="o_coa_hierarchy_account_name">
+                            <field name="name"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </templates>
+    </hierarchy>
+`;
 
-    coa_hierarchy_is_type_node = fields.Boolean();
-    coa_hierarchy_account_count = fields.Integer();
+const deprecatedSearchViewArch = `
+    <search>
+        <filter
+            name="deprecated_accounts"
+            string="Deprecated Accounts"
+            domain="[('deprecated', '=', True)]"
+        />
+    </search>
+`;
 
-    _records = [
-    {
-        id: 1,
-        name: "Deprecated Test Receivable",
-        code: "999001",
-        placeholder_code: "999001",
-        account_type: "asset_receivable",
-        deprecated: true,
-        coa_hierarchy_parent_id: false,
-        coa_hierarchy_is_type_node: false,
-        coa_hierarchy_account_count: 0,
-    },
-    {
-        id: 2,
-        name: "Active Test Income",
-        code: "999002",
-        placeholder_code: "999002",
-        account_type: "income",
-        deprecated: false,
-        coa_hierarchy_parent_id: false,
-        coa_hierarchy_is_type_node: false,
-        coa_hierarchy_account_count: 0,
-    },
-];
-
-    async get_coa_hierarchy_roots(domain = []) {
+function getHierarchyRoots(domain = []) {
     const showDeprecated = domain.some(
         (condition) =>
             Array.isArray(condition) &&
@@ -93,198 +95,285 @@ class Account extends models.Model {
         },
     ];
 }
-}
 
-
-defineModels([Account]);
-defineMailModels();
-
-describe.current.tags("desktop");
-
-async function enableFilters(filterNames = []) {
-    await toggleSearchBarMenu();
-
-    for (const filter of filterNames) {
-        await toggleMenuItem(filter);
+async function mockRPC(route, args) {
+    if (
+        args.model === "account.account" &&
+        args.method === "get_coa_hierarchy_roots"
+    ) {
+        const domain = args.args?.[0] || [];
+        return getHierarchyRoots(domain);
     }
 }
 
-const hierarchyArch = `
-    <hierarchy
-        parent_field="coa_hierarchy_parent_id"
-        js_class="account_coa_hierarchy_native"
-        draggable="0"
-        create="0"
-        edit="0"
-        delete="0"
-    >
-        <field name="name"/>
-        <field name="code"/>
-        <field name="placeholder_code"/>
-        <field name="account_type"/>
-        <field name="coa_hierarchy_parent_id"/>
-        <field name="coa_hierarchy_is_type_node"/>
-        <field name="coa_hierarchy_account_count"/>
+QUnit.module("Chart of Accounts Hierarchy", (hooks) => {
+    hooks.beforeEach(() => {
+        setupViewRegistries();
+        target = getFixture();
 
-        <templates>
-            <t t-name="hierarchy-box">
-
-                <t t-if="record.coa_hierarchy_is_type_node.raw_value">
-                    <div class="o_coa_hierarchy_type_card">
-                        <field name="account_type"/>
-                    </div>
-                </t>
-
-                <t t-else="">
-                    <div class="o_coa_hierarchy_account_card">
-                        <div class="o_coa_hierarchy_account_name">
-                            <field name="name"/>
-                        </div>
-                    </div>
-                </t>
-
-            </t>
-        </templates>
-    </hierarchy>
-`;
-
-
-test("deprecated account can be unfolded from account type", async () => {
-    await mountView({
-        type: "hierarchy",
-        resModel: "account.account",
-        arch: hierarchyArch,
-        domain: [["deprecated", "=", true]],
+        serverData = {
+            models: {
+                "account.account": {
+                    fields: {
+                        name: {
+                            string: "Account Name",
+                            type: "char",
+                        },
+                        code: {
+                            string: "Code",
+                            type: "char",
+                        },
+                        account_type: {
+                            string: "Account Type",
+                            type: "char",
+                        },
+                        deprecated: {
+                            string: "Deprecated",
+                            type: "boolean",
+                        },
+                        coa_hierarchy_parent_id: {
+                            string: "Hierarchy Parent",
+                            type: "many2one",
+                            relation: "account.account",
+                        },
+                        coa_hierarchy_is_type_node: {
+                            string: "Is Account Type Node",
+                            type: "boolean",
+                        },
+                        coa_hierarchy_account_count: {
+                            string: "Account Count",
+                            type: "integer",
+                        },
+                    },
+                    records: [
+                        {
+                            id: 1,
+                            name: "Deprecated Test Receivable",
+                            code: "999001",
+                            account_type: "asset_receivable",
+                            deprecated: true,
+                            coa_hierarchy_parent_id: false,
+                            coa_hierarchy_is_type_node: false,
+                            coa_hierarchy_account_count: 0,
+                        },
+                        {
+                            id: 2,
+                            name: "Active Test Income",
+                            code: "999002",
+                            account_type: "income",
+                            deprecated: false,
+                            coa_hierarchy_parent_id: false,
+                            coa_hierarchy_is_type_node: false,
+                            coa_hierarchy_account_count: 0,
+                        },
+                    ],
+                },
+            },
+            views: {},
+        };
     });
 
-    expect(".o_coa_hierarchy_type_card").toHaveText("Receivable");
-    expect(".o_coa_hierarchy_account_card").toHaveCount(0);
-
-    await contains(".o_hierarchy_node_button.btn-primary").click();
-
-    expect(".o_coa_hierarchy_account_card").toHaveText(
-        "Deprecated Test Receivable"
-    );
-});
-
-test("active account can be unfolded normally", async () => {
-    await mountView({
-        type: "hierarchy",
-        resModel: "account.account",
-        arch: hierarchyArch,
-        domain: [["deprecated", "=", false]],
+    hooks.afterEach(() => {
+        document
+            .querySelector("#x-odoo-technical-list-shadow-host")
+            ?.remove();
     });
 
-    expect(".o_coa_hierarchy_type_card").toHaveText("Income");
-    expect(".o_coa_hierarchy_account_card").toHaveCount(0);
+    QUnit.test(
+        "deprecated account can be unfolded from account type",
+        async function (assert) {
+            await makeView({
+                type: "hierarchy",
+                resModel: "account.account",
+                serverData,
+                arch: hierarchyArch,
+                domain: [["deprecated", "=", true]],
+                mockRPC,
+            });
 
-    await contains(".o_hierarchy_node_button.btn-primary").click();
+            assert.containsOnce(target, ".o_coa_hierarchy_type_card");
+            assert.strictEqual(
+                target.querySelector(".o_coa_hierarchy_type_card").textContent.trim(),
+                "Receivable"
+            );
+            assert.containsNone(target, ".o_coa_hierarchy_account_card");
 
-    expect(".o_coa_hierarchy_account_card").toHaveText(
-        "Active Test Income"
+            await click(target, ".o_hierarchy_node_button.btn-primary");
+
+            assert.containsOnce(target, ".o_coa_hierarchy_account_card");
+            assert.strictEqual(
+                target.querySelector(".o_coa_hierarchy_account_name").textContent.trim(),
+                "Deprecated Test Receivable"
+            );
+        }
     );
-});
 
-test("hierarchy reloads when search domain changes", async () => {
-    const searchViewArch = `
-        <search>
-            <filter
-                name="deprecated_accounts"
-                string="Deprecated Accounts"
-                domain="[('deprecated', '=', True)]"
-            />
-        </search>
-    `;
+    QUnit.test("active account can be unfolded normally", async function (assert) {
+        await makeView({
+            type: "hierarchy",
+            resModel: "account.account",
+            serverData,
+            arch: hierarchyArch,
+            domain: [["deprecated", "=", false]],
+            mockRPC,
+        });
 
-    await mountView({
-        type: "hierarchy",
-        resModel: "account.account",
-        arch: hierarchyArch,
-        searchViewArch,
+        assert.containsOnce(target, ".o_coa_hierarchy_type_card");
+        assert.strictEqual(
+            target.querySelector(".o_coa_hierarchy_type_card").textContent.trim(),
+            "Income"
+        );
+        assert.containsNone(target, ".o_coa_hierarchy_account_card");
+
+        await click(target, ".o_hierarchy_node_button.btn-primary");
+
+        assert.containsOnce(target, ".o_coa_hierarchy_account_card");
+        assert.strictEqual(
+            target.querySelector(".o_coa_hierarchy_account_name").textContent.trim(),
+            "Active Test Income"
+        );
     });
 
-    expect(".o_coa_hierarchy_type_card").toHaveCount(1);
-    expect(".o_coa_hierarchy_type_card").toHaveText("Income");
+    QUnit.test("hierarchy reloads when search domain changes", async function (assert) {
+        const view = await makeView({
+            type: "hierarchy",
+            resModel: "account.account",
+            serverData,
+            arch: hierarchyArch,
+            searchViewArch: deprecatedSearchViewArch,
+            mockRPC,
+        });
 
-    await contains(".o_hierarchy_node_button.btn-primary").click();
+        assert.containsOnce(target, ".o_coa_hierarchy_type_card");
+        assert.strictEqual(
+            target
+                .querySelector(".o_coa_hierarchy_type_card")
+                .textContent.trim(),
+            "Income"
+        );
 
-    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
-    expect(".o_coa_hierarchy_account_name").toHaveText(
-        "Active Test Income"
-    );
+        await click(
+            target,
+            ".o_hierarchy_node_button.btn-primary"
+        );
 
-    // Use the visible filter label, not its technical name.
-    await enableFilters(["Deprecated Accounts"]);
+        assert.containsOnce(
+            target,
+            ".o_coa_hierarchy_account_card"
+        );
 
-    expect(".o_coa_hierarchy_type_card").toHaveCount(1);
-    expect(".o_coa_hierarchy_type_card").toHaveText("Receivable");
+        assert.strictEqual(
+            target
+                .querySelector(".o_coa_hierarchy_account_name")
+                .textContent.trim(),
+            "Active Test Income"
+        );
 
-    // The previously expanded active account must be gone.
-    expect(".o_coa_hierarchy_account_card").toHaveCount(0);
+        const deprecatedFilter =
+            view.env.searchModel.getSearchItems(
+                (item) =>
+                    item.type === "filter" &&
+                    item.name === "deprecated_accounts"
+            )[0];
 
-    await contains(".o_hierarchy_node_button.btn-primary").click();
+        view.env.searchModel.toggleSearchItem(
+            deprecatedFilter.id
+        );
 
-    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
-    expect(".o_coa_hierarchy_account_name").toHaveText(
-        "Deprecated Test Receivable"
-    );
-});
+        await nextTick();
 
-test("clicking account type expands and collapses without opening a record", async () => {
-    const selectedResIds = [];
+        assert.containsOnce(
+            target,
+            ".o_coa_hierarchy_type_card"
+        );
 
-    await mountView({
-        type: "hierarchy",
-        resModel: "account.account",
-        arch: hierarchyArch,
-        selectRecord: (resId) => {
-            selectedResIds.push(resId);
-        },
+        assert.strictEqual(
+            target
+                .querySelector(".o_coa_hierarchy_type_card")
+                .textContent.trim(),
+            "Receivable"
+        );
+
+        // Previously expanded active account must disappear
+        // after the search domain changes.
+        assert.containsNone(
+            target,
+            ".o_coa_hierarchy_account_card"
+        );
+
+        await click(
+            target,
+            ".o_hierarchy_node_button.btn-primary"
+        );
+
+        assert.containsOnce(
+            target,
+            ".o_coa_hierarchy_account_card"
+        );
+
+        assert.strictEqual(
+            target
+                .querySelector(".o_coa_hierarchy_account_name")
+                .textContent.trim(),
+            "Deprecated Test Receivable"
+        );
     });
 
-    expect(".o_coa_hierarchy_type_card").toHaveCount(1);
-    expect(".o_coa_hierarchy_type_card").toHaveText("Income");
+    QUnit.test("clicking account type expands and collapses without opening a record", async function (assert) {
+            const selectedResIds = [];
 
-    // Clicking the Account Type card itself should unfold it.
-    await contains(".o_coa_hierarchy_type_card").click();
+            await makeView({
+                type: "hierarchy",
+                resModel: "account.account",
+                serverData,
+                arch: hierarchyArch,
+                mockRPC,
+                selectRecord: (resId) => {
+                    selectedResIds.push(resId);
+                },
+            });
 
-    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
-    expect(".o_coa_hierarchy_account_name").toHaveText(
-        "Active Test Income"
-    );
+            assert.containsOnce(target, ".o_coa_hierarchy_type_card");
+            assert.strictEqual(
+                target.querySelector(".o_coa_hierarchy_type_card").textContent.trim(),
+                "Income"
+            );
 
-    // The virtual negative node must never be passed to selectRecord().
-    expect(selectedResIds).toEqual([]);
+            await click(target, ".o_coa_hierarchy_type_card");
 
-    // Clicking the type card again should collapse it.
-    await contains(".o_coa_hierarchy_type_card").click();
+            assert.containsOnce(target, ".o_coa_hierarchy_account_card");
+            assert.deepEqual(selectedResIds, []);
 
-    expect(".o_coa_hierarchy_account_card").toHaveCount(0);
-    expect(selectedResIds).toEqual([]);
-});
+            await click(target, ".o_coa_hierarchy_type_card");
 
-test("clicking a real account opens the account record", async () => {
-    const selectedResIds = [];
+            assert.containsNone(target, ".o_coa_hierarchy_account_card");
+            assert.deepEqual(selectedResIds, []);
+        });
 
-    await mountView({
-        type: "hierarchy",
-        resModel: "account.account",
-        arch: hierarchyArch,
-        selectRecord: (resId) => {
-            selectedResIds.push(resId);
-        },
+    QUnit.test("clicking a real account opens the account record", async function (assert) {
+        const selectedResIds = [];
+
+        await makeView({
+            type: "hierarchy",
+            resModel: "account.account",
+            serverData,
+            arch: hierarchyArch,
+            mockRPC,
+            selectRecord: (resId) => {
+                selectedResIds.push(resId);
+            },
+        });
+
+        await click(target, ".o_hierarchy_node_button.btn-primary");
+
+        assert.containsOnce(target, ".o_coa_hierarchy_account_card");
+        assert.strictEqual(
+            target.querySelector(".o_coa_hierarchy_account_name").textContent.trim(),
+            "Active Test Income"
+        );
+
+        await click(target, ".o_coa_hierarchy_account_card");
+
+        assert.deepEqual(selectedResIds, [2]);
     });
-
-    // First expose the real account.
-    await contains(".o_hierarchy_node_button.btn-primary").click();
-
-    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
-    expect(".o_coa_hierarchy_account_name").toHaveText(
-        "Active Test Income"
-    );
-
-    // Clicking the account card should use normal Odoo navigation.
-    await contains(".o_coa_hierarchy_account_card").click();
-
-    expect(selectedResIds).toEqual([2]);
 });
