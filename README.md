@@ -58,6 +58,10 @@ Account Type nodes are virtual hierarchy nodes used only for visualization.
 
 The accounts below them are real `account.account` records.
 
+## Screenshot
+
+![Chart of Accounts Hierarchy](docs/images/account-coa-hierarchy.png)
+
 ## Odoo Integration
 
 The module extends the existing Chart of Accounts action.
