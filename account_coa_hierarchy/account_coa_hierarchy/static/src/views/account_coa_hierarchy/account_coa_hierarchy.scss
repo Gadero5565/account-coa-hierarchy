@@ -1,0 +1,24 @@
+.o_hierarchy_view {
+    .o_coa_hierarchy_type_card,
+    .o_coa_hierarchy_account_card {
+        min-width: 230px;
+    }
+
+    .o_coa_hierarchy_type_card {
+        padding: 0.75rem;
+        text-align: center;
+    }
+
+    .o_coa_hierarchy_type_title {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .o_coa_hierarchy_account_card {
+        padding: 0.75rem;
+    }
+
+    .o_coa_hierarchy_account_name {
+        line-height: 1.2;
+    }
+}
