@@ -17,6 +17,9 @@
         "web.assets_backend": [
             "account_coa_hierarchy/static/src/views/account_coa_hierarchy/**/*",
         ],
+        "web.assets_unit_tests": [
+            "account_coa_hierarchy/static/tests/**/*",
+        ],
     },
     "installable": True,
     "application": False,
