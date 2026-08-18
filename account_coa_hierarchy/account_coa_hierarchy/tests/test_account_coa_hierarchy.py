@@ -1,4 +1,3 @@
-from odoo import Command
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
@@ -19,7 +18,7 @@ class TestAccountCoaHierarchy(TransactionCase):
                 "code": code,
                 "account_type": account_type,
                 "deprecated": deprecated,
-                "company_ids": [Command.set([cls.company.id])],
+                "company_id": cls.company.id,
             })
 
         cls.income_account_1 = create_account(
@@ -197,8 +196,8 @@ class TestAccountCoaHierarchy(TransactionCase):
 
         self.assertEqual(
             view_modes[0],
-            "list",
-            "Chart of Accounts must continue opening in List view.",
+            "tree",
+            "Chart of Accounts must continue opening in Tree view.",
         )
 
         self.assertEqual(

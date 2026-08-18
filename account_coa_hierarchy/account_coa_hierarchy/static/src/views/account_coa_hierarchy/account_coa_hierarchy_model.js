@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { HierarchyModel } from "@web_hierarchy/hierarchy_model";
 
 export class AccountCoaHierarchyModel extends HierarchyModel {
@@ -56,7 +58,7 @@ export class AccountCoaHierarchyModel extends HierarchyModel {
             this.fieldsToFetch,
             {
                 context: this.context,
-                order: "code, placeholder_code",
+                order: "code",
             }
         );
 

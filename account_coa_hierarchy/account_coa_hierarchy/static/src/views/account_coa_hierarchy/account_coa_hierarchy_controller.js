@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { HierarchyController } from "@web_hierarchy/hierarchy_controller";
 
 export class AccountCoaHierarchyController extends HierarchyController {

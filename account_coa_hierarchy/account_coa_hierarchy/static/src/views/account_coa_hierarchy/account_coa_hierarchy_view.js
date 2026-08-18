@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { registry } from "@web/core/registry";
 import { hierarchyView } from "@web_hierarchy/hierarchy_view";
 import { AccountCoaHierarchyController } from "./account_coa_hierarchy_controller";
