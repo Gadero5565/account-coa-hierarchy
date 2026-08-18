@@ -43,18 +43,19 @@
                         </t>
                         <t t-else="">
                             <div class="o_coa_hierarchy_account_card">
-                                <div class="d-flex align-items-start justify-content-between gap-2">
-                                    <strong class="o_coa_hierarchy_account_name">
-                                        <field name="name"/>
-                                    </strong>
-                                    <span class="badge text-bg-light border o_coa_hierarchy_account_code"
-                                          t-att-title="record.placeholder_code.raw_value || record.code.raw_value">
+                                <div class="o_coa_hierarchy_account_code_row">
+                                    <span class="o_coa_hierarchy_account_code"
+                                            t-att-title="record.placeholder_code.raw_value || record.code.raw_value">
                                         <field name="code"
-                                               widget="char_with_placeholder_field"
-                                               options="{'placeholder_field': 'placeholder_code'}"/>
+                                                widget="char_with_placeholder_field"
+                                                options="{'placeholder_field': 'placeholder_code'}"/>
                                     </span>
                                 </div>
-                                <div class="text-muted small mt-2">
+                                <div class="o_coa_hierarchy_account_name"
+                                        t-att-title="record.name.raw_value">
+                                    <field name="name"/>
+                                </div>
+                                <div class="o_coa_hierarchy_account_type text-muted">
                                     <field name="account_type"/>
                                 </div>
                             </div>

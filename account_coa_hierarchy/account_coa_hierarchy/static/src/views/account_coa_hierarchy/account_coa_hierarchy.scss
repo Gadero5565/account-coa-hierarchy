@@ -15,24 +15,49 @@
     }
 
     .o_coa_hierarchy_account_card {
-        padding: 0.75rem;
+        width: 230px;
+        min-height: 118px;
+        padding: 0.875rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .o_coa_hierarchy_account_code_row {
+        min-height: 24px;
+        margin-bottom: 0.5rem;
+    }
+
+    .o_coa_hierarchy_account_code {
+        display: inline-block;
+        max-width: 100%;
+        padding: 0.15rem 0.45rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 0.8rem;
+        line-height: 1.2;
+
+        .o_field_widget {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     }
 
     .o_coa_hierarchy_account_name {
-        line-height: 1.2;
-    }
-}
-.o_coa_hierarchy_account_code {
-    max-width: 115px;
-    min-width: 0;
-    overflow: hidden;
-    vertical-align: middle;
-
-    .o_field_widget {
-        display: block;
-        max-width: 100%;
+        min-width: 0;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        font-weight: 600;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .o_coa_hierarchy_account_type {
+        margin-top: auto;
+        padding-top: 0.75rem;
+        font-size: 0.8rem;
     }
 }
