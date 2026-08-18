@@ -239,3 +239,62 @@ test("hierarchy reloads when search domain changes", async () => {
         "Inactive Test Receivable"
     );
 });
+
+test("clicking account type expands and collapses without opening a record", async () => {
+    const selectedResIds = [];
+
+    await mountView({
+        type: "hierarchy",
+        resModel: "account.account",
+        arch: hierarchyArch,
+        selectRecord: (resId) => {
+            selectedResIds.push(resId);
+        },
+    });
+
+    expect(".o_coa_hierarchy_type_card").toHaveCount(1);
+    expect(".o_coa_hierarchy_type_card").toHaveText("Income");
+
+    // Clicking the Account Type card itself should unfold it.
+    await contains(".o_coa_hierarchy_type_card").click();
+
+    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
+    expect(".o_coa_hierarchy_account_name").toHaveText(
+        "Active Test Income"
+    );
+
+    // The virtual negative node must never be passed to selectRecord().
+    expect(selectedResIds).toEqual([]);
+
+    // Clicking the type card again should collapse it.
+    await contains(".o_coa_hierarchy_type_card").click();
+
+    expect(".o_coa_hierarchy_account_card").toHaveCount(0);
+    expect(selectedResIds).toEqual([]);
+});
+
+test("clicking a real account opens the account record", async () => {
+    const selectedResIds = [];
+
+    await mountView({
+        type: "hierarchy",
+        resModel: "account.account",
+        arch: hierarchyArch,
+        selectRecord: (resId) => {
+            selectedResIds.push(resId);
+        },
+    });
+
+    // First expose the real account.
+    await contains(".o_hierarchy_node_button.btn-primary").click();
+
+    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
+    expect(".o_coa_hierarchy_account_name").toHaveText(
+        "Active Test Income"
+    );
+
+    // Clicking the account card should use normal Odoo navigation.
+    await contains(".o_coa_hierarchy_account_card").click();
+
+    expect(selectedResIds).toEqual([2]);
+});
