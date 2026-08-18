@@ -9,6 +9,7 @@
         "standard Chart of Accounts behavior."
     ),
     "author": "Gadeer Mahmoud",
+    "website": "https://github.com/Gadero5565/account-coa-hierarchy",
     "depends": ["account", "web_hierarchy"],
     "data": [
         "views/account_account_views.xml",
