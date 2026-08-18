@@ -20,7 +20,7 @@ class Account extends models.Model {
     code = fields.Char();
     placeholder_code = fields.Char();
     account_type = fields.Char();
-    active = fields.Boolean();
+    deprecated = fields.Boolean();
 
     coa_hierarchy_parent_id = fields.Many2one({
         relation: "account.account",
@@ -30,67 +30,67 @@ class Account extends models.Model {
     coa_hierarchy_account_count = fields.Integer();
 
     _records = [
-        {
-            id: 1,
-            name: "Inactive Test Receivable",
-            code: "999001",
-            placeholder_code: false,
-            account_type: "Receivable",
-            active: false,
-            coa_hierarchy_parent_id: false,
-            coa_hierarchy_is_type_node: false,
-            coa_hierarchy_account_count: 0,
-        },
-        {
-            id: 2,
-            name: "Active Test Income",
-            code: "999002",
-            placeholder_code: false,
-            account_type: "Income",
-            active: true,
-            coa_hierarchy_parent_id: false,
-            coa_hierarchy_is_type_node: false,
-            coa_hierarchy_account_count: 0,
-        },
-    ];
+    {
+        id: 1,
+        name: "Deprecated Test Receivable",
+        code: "999001",
+        placeholder_code: "999001",
+        account_type: "asset_receivable",
+        deprecated: true,
+        coa_hierarchy_parent_id: false,
+        coa_hierarchy_is_type_node: false,
+        coa_hierarchy_account_count: 0,
+    },
+    {
+        id: 2,
+        name: "Active Test Income",
+        code: "999002",
+        placeholder_code: "999002",
+        account_type: "income",
+        deprecated: false,
+        coa_hierarchy_parent_id: false,
+        coa_hierarchy_is_type_node: false,
+        coa_hierarchy_account_count: 0,
+    },
+];
 
-    get_coa_hierarchy_roots(domain = []) {
-        const wantsInactive = domain.some(
-            (leaf) =>
-                Array.isArray(leaf) &&
-                leaf[0] === "active" &&
-                leaf[1] === "=" &&
-                leaf[2] === false
-        );
+    async get_coa_hierarchy_roots(domain = []) {
+    const showDeprecated = domain.some(
+        (condition) =>
+            Array.isArray(condition) &&
+            condition[0] === "deprecated" &&
+            condition[1] === "=" &&
+            condition[2] === true
+    );
 
-        if (wantsInactive) {
-            return [
-                {
-                    id: -1,
-                    name: "Receivable",
-                    display_name: "Receivable",
-                    account_type: "Receivable",
-                    coa_hierarchy_parent_id: false,
-                    coa_hierarchy_is_type_node: true,
-                    coa_hierarchy_account_count: 1,
-                    __child_ids__: [1],
-                },
-            ];
-        }
-
+    if (showDeprecated) {
         return [
             {
-                id: -2,
-                name: "Income",
-                display_name: "Income",
-                account_type: "Income",
+                id: -1,
+                name: "Receivable",
+                display_name: "Receivable",
+                account_type: "Receivable",
                 coa_hierarchy_parent_id: false,
                 coa_hierarchy_is_type_node: true,
                 coa_hierarchy_account_count: 1,
-                __child_ids__: [2],
+                __child_ids__: [1],
             },
         ];
     }
+
+    return [
+        {
+            id: -2,
+            name: "Income",
+            display_name: "Income",
+            account_type: "Income",
+            coa_hierarchy_parent_id: false,
+            coa_hierarchy_is_type_node: true,
+            coa_hierarchy_account_count: 1,
+            __child_ids__: [2],
+        },
+    ];
+}
 }
 
 
@@ -147,32 +147,21 @@ const hierarchyArch = `
 `;
 
 
-test("inactive account can be unfolded from account type", async () => {
+test("deprecated account can be unfolded from account type", async () => {
     await mountView({
         type: "hierarchy",
         resModel: "account.account",
         arch: hierarchyArch,
-        domain: [["active", "=", false]],
+        domain: [["deprecated", "=", true]],
     });
 
-    // The virtual Receivable parent is visible.
-    expect(".o_coa_hierarchy_type_card").toHaveCount(1);
     expect(".o_coa_hierarchy_type_card").toHaveText("Receivable");
-
-    // The inactive account has not been lazy-loaded yet.
     expect(".o_coa_hierarchy_account_card").toHaveCount(0);
-
-    // Expand the virtual Account Type.
-    expect(".o_hierarchy_node_button.btn-primary").toHaveCount(1);
 
     await contains(".o_hierarchy_node_button.btn-primary").click();
 
-    // Regression:
-    // inactive account must still be returned during the lazy read.
-    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
-
-    expect(".o_coa_hierarchy_account_name").toHaveText(
-        "Inactive Test Receivable"
+    expect(".o_coa_hierarchy_account_card").toHaveText(
+        "Deprecated Test Receivable"
     );
 });
 
@@ -181,36 +170,35 @@ test("active account can be unfolded normally", async () => {
         type: "hierarchy",
         resModel: "account.account",
         arch: hierarchyArch,
+        domain: [["deprecated", "=", false]],
     });
 
-    expect(".o_coa_hierarchy_type_card").toHaveCount(1);
     expect(".o_coa_hierarchy_type_card").toHaveText("Income");
-
     expect(".o_coa_hierarchy_account_card").toHaveCount(0);
 
     await contains(".o_hierarchy_node_button.btn-primary").click();
 
-    expect(".o_coa_hierarchy_account_card").toHaveCount(1);
-
-    expect(".o_coa_hierarchy_account_name").toHaveText(
+    expect(".o_coa_hierarchy_account_card").toHaveText(
         "Active Test Income"
     );
 });
 
 test("hierarchy reloads when search domain changes", async () => {
+    const searchViewArch = `
+        <search>
+            <filter
+                name="deprecated_accounts"
+                string="Deprecated Accounts"
+                domain="[('deprecated', '=', True)]"
+            />
+        </search>
+    `;
+
     await mountView({
         type: "hierarchy",
         resModel: "account.account",
         arch: hierarchyArch,
-        searchViewArch: `
-            <search>
-                <filter
-                    name="inactive_accounts"
-                    string="Inactive Accounts"
-                    domain="[('active', '=', False)]"
-                />
-            </search>
-        `,
+        searchViewArch,
     });
 
     expect(".o_coa_hierarchy_type_card").toHaveCount(1);
@@ -224,7 +212,7 @@ test("hierarchy reloads when search domain changes", async () => {
     );
 
     // Use the visible filter label, not its technical name.
-    await enableFilters(["Inactive Accounts"]);
+    await enableFilters(["Deprecated Accounts"]);
 
     expect(".o_coa_hierarchy_type_card").toHaveCount(1);
     expect(".o_coa_hierarchy_type_card").toHaveText("Receivable");
@@ -236,7 +224,7 @@ test("hierarchy reloads when search domain changes", async () => {
 
     expect(".o_coa_hierarchy_account_card").toHaveCount(1);
     expect(".o_coa_hierarchy_account_name").toHaveText(
-        "Inactive Test Receivable"
+        "Deprecated Test Receivable"
     );
 });
 

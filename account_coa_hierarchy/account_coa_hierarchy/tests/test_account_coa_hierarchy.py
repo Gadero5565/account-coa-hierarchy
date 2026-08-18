@@ -13,12 +13,12 @@ class TestAccountCoaHierarchy(TransactionCase):
         cls.Account = cls.env["account.account"]
         cls.company = cls.env.company
 
-        def create_account(name, code, account_type, active=True):
+        def create_account(name, code, account_type, deprecated=False):
             return cls.Account.with_company(cls.company).create({
                 "name": name,
                 "code": code,
                 "account_type": account_type,
-                "active": active,
+                "deprecated": deprecated,
                 "company_ids": [Command.set([cls.company.id])],
             })
 
@@ -40,21 +40,19 @@ class TestAccountCoaHierarchy(TransactionCase):
             "expense",
         )
 
-        cls.inactive_receivable_account = create_account(
-            "COA Hierarchy Test Inactive Receivable",
+        cls.deprecated_receivable_account = create_account(
+            "COA Hierarchy Test Deprecated Receivable",
             "HIER004",
             "asset_receivable",
-            active=False,
+            deprecated=True,
         )
 
         cls.test_domain = [
             ("name", "ilike", "COA Hierarchy Test"),
         ]
 
-    def _get_roots_by_type(self, domain=None, active_test=True):
-        roots = self.Account.with_context(
-            active_test=active_test,
-        ).get_coa_hierarchy_roots(domain or [])
+    def _get_roots_by_type(self, domain=None):
+        roots = self.Account.get_coa_hierarchy_roots(domain or [])
 
         return {
             root["account_type"]: root
@@ -68,7 +66,7 @@ class TestAccountCoaHierarchy(TransactionCase):
 
         self.assertEqual(
             set(roots),
-            {"income", "expense"},
+            {"income", "expense", "asset_receivable"},
         )
 
         income_root = roots["income"]
@@ -147,16 +145,13 @@ class TestAccountCoaHierarchy(TransactionCase):
 
         self.assertFalse(roots)
 
-    def test_inactive_accounts_can_build_hierarchy(self):
-        """Inactive-filter domains must still generate hierarchy roots."""
+    def test_deprecated_accounts_can_build_hierarchy(self):
+        """Deprecated-account domains must generate the expected hierarchy."""
 
-        roots = self._get_roots_by_type(
-            [
-                *self.test_domain,
-                ("active", "=", False),
-            ],
-            active_test=False,
-        )
+        roots = self._get_roots_by_type([
+            *self.test_domain,
+            ("deprecated", "=", True),
+        ])
 
         self.assertEqual(
             set(roots),
@@ -172,13 +167,16 @@ class TestAccountCoaHierarchy(TransactionCase):
 
         self.assertEqual(
             receivable_root["__child_ids__"],
-            [self.inactive_receivable_account.id],
+            [self.deprecated_receivable_account.id],
         )
 
-    def test_default_context_excludes_inactive_accounts(self):
-        """Inactive accounts must not leak into the normal hierarchy."""
+    def test_active_account_domain_excludes_deprecated_accounts(self):
+        """Odoo 18's Active Account filter must exclude deprecated accounts."""
 
-        roots = self._get_roots_by_type(self.test_domain)
+        roots = self._get_roots_by_type([
+            *self.test_domain,
+            ("deprecated", "=", False),
+        ])
 
         child_ids = {
             account_id
@@ -187,7 +185,7 @@ class TestAccountCoaHierarchy(TransactionCase):
         }
 
         self.assertNotIn(
-            self.inactive_receivable_account.id,
+            self.deprecated_receivable_account.id,
             child_ids,
         )
 

@@ -1,6 +1,6 @@
 {
     "name": "Chart of Accounts Hierarchy",
-    "version": "19.0.1.0.0",
+    "version": "18.0.1.0.0",
     "category": "Accounting/Accounting",
     "summary": "Native hierarchy view for Chart of Accounts grouped by account type",
     "description": (

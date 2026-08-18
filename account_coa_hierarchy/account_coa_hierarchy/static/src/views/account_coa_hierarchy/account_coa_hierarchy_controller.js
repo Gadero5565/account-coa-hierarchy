@@ -1,7 +1,7 @@
 import { HierarchyController } from "@web_hierarchy/hierarchy_controller";
 
 export class AccountCoaHierarchyController extends HierarchyController {
-    async openRecord(node, newWindow) {
+    async openRecord(node, mode) {
         if (node.data.coa_hierarchy_is_type_node) {
             if (node.nodes.length) {
                 node.collapseChildNodes();
@@ -11,8 +11,7 @@ export class AccountCoaHierarchyController extends HierarchyController {
             return;
         }
 
-        // The hierarchy action itself is account.account now, so standard
-        // record navigation opens the genuine account form directly.
-        return super.openRecord(node, newWindow);
+        // Real hierarchy leaves are genuine account.account records.
+        return super.openRecord(node, mode);
     }
 }

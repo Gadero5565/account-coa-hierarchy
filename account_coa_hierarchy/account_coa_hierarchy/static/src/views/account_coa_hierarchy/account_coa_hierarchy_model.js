@@ -10,7 +10,11 @@ export class AccountCoaHierarchyModel extends HierarchyModel {
      */
     async _loadData(config, reload = false) {
         const domain = config.domain || [];
-        const context = { bin_size: true, ...(config.context || {}) };
+        const context = {
+            bin_size: true,
+            ...(config.context || {}),
+        };
+
         return await this.orm.call(
             this.resModel,
             "get_coa_hierarchy_roots",
@@ -20,47 +24,55 @@ export class AccountCoaHierarchyModel extends HierarchyModel {
     }
 
     /**
-     * Account-type roots contain only child account IDs. Fetch those IDs from
-     * account.account when the user unfolds a type. Leaves are real records.
+     * Account-type roots contain only child account IDs.
+     * Fetch those real account.account records when a type is unfolded.
+     *
+     * Odoo 18 hierarchy uses searchRead() + fieldsToFetch rather than the
+     * webSearchRead()/field-spec API used by Odoo 19.
      */
     async _fetchSubordinates(node, excludeResIds = null) {
         if (!node.data.coa_hierarchy_is_type_node) {
             return [];
         }
 
-        const childFieldName = this.childFieldName || this.defaultChildFieldName;
+        const childFieldName =
+            this.childFieldName || this.defaultChildFieldName;
+
         let childResIds = node.data[childFieldName] || [];
 
         if (excludeResIds?.length) {
-            childResIds = childResIds.filter((id) => !excludeResIds.includes(id));
+            childResIds = childResIds.filter(
+                (id) => !excludeResIds.includes(id)
+            );
         }
+
         if (!childResIds.length) {
             return [];
         }
 
-        const { records } = await this.orm.webSearchRead(
+        const records = await this.orm.searchRead(
             this.resModel,
             [["id", "in", childResIds]],
+            this.fieldsToFetch,
             {
-                specification: this._getFieldsSpec(),
-                // childResIds were already produced from the current search domain.
-                // Disable active_test here so inactive accounts selected by the
-                // "Inactive Accounts" filter can still be lazy-loaded.
-                context: {
-                    ...this.context,
-                    active_test: false,
-                },
+                context: this.context,
                 order: "code, placeholder_code",
             }
         );
 
         for (const record of records) {
-            // These values are only frontend hierarchy metadata. Nothing is
-            // written to account.account.
-            record.coa_hierarchy_parent_id = {
-                id: node.resId,
-                display_name: node.data.display_name || node.data.name,
-            };
+            /*
+             * Odoo 18 represents Many2one values as:
+             *
+             *     [id, display_name]
+             *
+             * whereas Odoo 19 uses an object containing id/display_name.
+             */
+            record.coa_hierarchy_parent_id = [
+                node.resId,
+                node.data.display_name || node.data.name,
+            ];
+
             record.coa_hierarchy_is_type_node = false;
             record.coa_hierarchy_account_count = 0;
             record[childFieldName] = [];
