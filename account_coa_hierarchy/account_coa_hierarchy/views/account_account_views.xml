@@ -28,16 +28,23 @@
                     <t t-name="hierarchy-box">
                         <t t-if="record.coa_hierarchy_is_type_node.raw_value">
                             <div class="o_coa_hierarchy_type_card">
-                                <div class="o_coa_hierarchy_type_title">
-                                    <i class="fa fa-folder-open-o me-2"
+                                <div class="o_coa_hierarchy_type_header">
+                                    <i class="fa fa-folder-open-o"
                                        role="img"
                                        aria-label="Account Type"
                                        title="Account Type"/>
-                                    <field name="account_type"/>
+                                    <span class="o_coa_hierarchy_type_title">
+                                        <field name="account_type"/>
+                                    </span>
                                 </div>
-                                <div class="text-muted mt-2">
+                                <div class="o_coa_hierarchy_type_count text-muted">
                                     <strong t-out="record.coa_hierarchy_account_count.raw_value"/>
-                                    <span>Accounts</span>
+                                    <t t-if="record.coa_hierarchy_account_count.raw_value === 1">
+                                        <span class="ms-1">Account</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="ms-1">Accounts</span>
+                                    </t>
                                 </div>
                             </div>
                         </t>
@@ -45,14 +52,14 @@
                             <div class="o_coa_hierarchy_account_card">
                                 <div class="o_coa_hierarchy_account_code_row">
                                     <span class="o_coa_hierarchy_account_code"
-                                            t-att-title="record.placeholder_code.raw_value || record.code.raw_value">
+                                          t-att-title="record.placeholder_code.raw_value || record.code.raw_value">
                                         <field name="code"
-                                                widget="char_with_placeholder_field"
-                                                options="{'placeholder_field': 'placeholder_code'}"/>
+                                               widget="char_with_placeholder_field"
+                                               options="{'placeholder_field': 'placeholder_code'}"/>
                                     </span>
                                 </div>
                                 <div class="o_coa_hierarchy_account_name"
-                                        t-att-title="record.name.raw_value">
+                                     t-att-title="record.name.raw_value">
                                     <field name="name"/>
                                 </div>
                                 <div class="o_coa_hierarchy_account_type text-muted">
