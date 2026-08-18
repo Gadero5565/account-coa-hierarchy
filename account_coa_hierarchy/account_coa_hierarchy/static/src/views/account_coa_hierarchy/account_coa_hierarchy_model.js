@@ -43,7 +43,13 @@ export class AccountCoaHierarchyModel extends HierarchyModel {
             [["id", "in", childResIds]],
             {
                 specification: this._getFieldsSpec(),
-                context: this.context,
+                // childResIds were already produced from the current search domain.
+                // Disable active_test here so inactive accounts selected by the
+                // "Inactive Accounts" filter can still be lazy-loaded.
+                context: {
+                    ...this.context,
+                    active_test: false,
+                },
                 order: "code, placeholder_code",
             }
         );
