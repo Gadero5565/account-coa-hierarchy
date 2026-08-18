@@ -22,3 +22,17 @@
         line-height: 1.2;
     }
 }
+.o_coa_hierarchy_account_code {
+    max-width: 115px;
+    min-width: 0;
+    overflow: hidden;
+    vertical-align: middle;
+
+    .o_field_widget {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
