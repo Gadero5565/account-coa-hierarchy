@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chart of Accounts Hierarchy</title>
+</head>
+
+<body>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced text-center">
+        <img src="cover.png"
+             alt="Chart of Accounts Hierarchy"
+             style="max-width: 100%; height: auto; border-radius: 12px;"/>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12 text-center">
+            <h2 class="oe_slogan">
+                Chart of Accounts Hierarchy
+            </h2>
+
+            <h3 class="oe_slogan">
+                A native hierarchy view for the Odoo Chart of Accounts
+            </h3>
+
+            <p style="font-size: 18px; line-height: 1.7; max-width: 900px; margin: 0 auto;">
+                Add an optional hierarchy view to the standard Chart of Accounts
+                and organize accounts visually by account type while preserving
+                Odoo's normal accounting workflow.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="text-center">Why use this module?</h2>
+
+            <p style="font-size: 17px; line-height: 1.7;">
+                A large Chart of Accounts can become difficult to navigate when
+                every account is presented only as a flat list. This module adds
+                a visual hierarchy that groups accounts by their account type,
+                making the structure easier to understand and explore.
+            </p>
+
+            <p style="font-size: 17px; line-height: 1.7;">
+                The standard Chart of Accounts behavior is preserved. The normal
+                list or tree view remains the default view, and the hierarchy is
+                added as an optional additional view.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="text-center">Key Features</h2>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Native Hierarchy Experience</h4>
+            <p>
+                Uses Odoo's native hierarchy infrastructure for a familiar and
+                responsive user experience.
+            </p>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Account Type Grouping</h4>
+            <p>
+                Accounts are organized visually under their corresponding
+                account type.
+            </p>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Fold and Unfold</h4>
+            <p>
+                Expand only the account types you need and collapse them again
+                to keep the view clean.
+            </p>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Real Account Navigation</h4>
+            <p>
+                Clicking an account opens the normal Odoo account form without
+                introducing fake accounting records.
+            </p>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Search and Filters</h4>
+            <p>
+                The hierarchy follows the current Chart of Accounts domain,
+                including standard searches and filters.
+            </p>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Multi-Company Friendly</h4>
+            <p>
+                Works with Odoo's normal company context and account visibility
+                rules.
+            </p>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Deprecated / Inactive Account Support</h4>
+            <p>
+                Account visibility follows the behavior of the supported Odoo
+                version and its standard Chart of Accounts filters.
+            </p>
+        </div>
+
+        <div class="oe_span6">
+            <h4>Non-Intrusive Integration</h4>
+            <p>
+                The module adds hierarchy as an extra view without replacing the
+                standard Chart of Accounts views.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="text-center">Hierarchy Structure</h2>
+
+            <div style="max-width: 720px;
+                        margin: 25px auto;
+                        padding: 25px;
+                        border: 1px solid #ddd;
+                        border-radius: 12px;
+                        background: #f8f8f8;
+                        font-family: monospace;
+                        font-size: 16px;
+                        line-height: 1.8;">
+                Account Type<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;├── Account<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;├── Account<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;└── Account
+            </div>
+
+            <p style="font-size: 17px; line-height: 1.7;">
+                Account Type cards are virtual hierarchy nodes used only for
+                visualization. The account cards below them are real
+                <strong>account.account</strong> records.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12 text-center">
+            <h2>Hierarchy Overview</h2>
+
+            <img src="screenshot_1.png"
+                    alt="Chart of Accounts hierarchy overview"
+                    style="max-width: 100%; height: auto; border-radius: 10px; border: 1px solid #ddd;"/>
+
+            <p style="margin-top: 15px; font-size: 16px;">
+                View the Chart of Accounts grouped by account type.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12 text-center">
+            <h2>Fold and Unfold Accounts</h2>
+
+            <img src="screenshot_2.png"
+                    alt="Expanded account type with accounts"
+                    style="max-width: 100%; height: auto; border-radius: 10px; border: 1px solid #ddd;"/>
+
+            <p style="margin-top: 15px; font-size: 16px;">
+                Expand an account type to display its real account records.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12 text-center">
+            <h2>Search and Filtering</h2>
+
+            <img src="screenshot_3.png"
+                    alt="Chart of Accounts hierarchy search and filters"
+                    style="max-width: 100%; height: auto; border-radius: 10px; border: 1px solid #ddd;"/>
+
+            <p style="margin-top: 15px; font-size: 16px;">
+                Standard Chart of Accounts searches and filters are reflected
+                directly in the hierarchy.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12 text-center">
+            <h2>Normal Odoo Account Navigation</h2>
+
+            <img src="screenshot_4.png"
+                    alt="Opening a real account from the hierarchy"
+                    style="max-width: 100%; height: auto; border-radius: 10px; border: 1px solid #ddd;"/>
+
+            <p style="margin-top: 15px; font-size: 16px;">
+                Click an account card to open the standard Odoo account form.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="text-center">Designed to Preserve Standard Odoo Behavior</h2>
+
+            <p style="font-size: 17px; line-height: 1.7;">
+                The module does not replace the Chart of Accounts action and
+                does not change accounting relationships. It simply adds an
+                additional hierarchy visualization.
+            </p>
+
+            <div style="
+                    max-width: 760px;
+                    margin: 20px auto;
+                    padding: 20px;
+                    border-radius: 10px;
+                    background: #f8f8f8;
+                    border: 1px solid #ddd;
+                ">
+                <strong>Standard views remain available.</strong><br/>
+                The normal list/tree view remains the default, while Hierarchy
+                is available as an additional view option.
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="text-center">Technical Highlights</h2>
+
+            <ul style="font-size: 17px; line-height: 1.9;">
+                <li>Built on top of Odoo's <strong>web_hierarchy</strong> functionality.</li>
+                <li>Uses <strong>account.account</strong> as the real account model.</li>
+                <li>Account Type roots are virtual visualization nodes.</li>
+                <li>Account records are loaded when an Account Type is unfolded.</li>
+                <li>No fake accounting records are created.</li>
+                <li>No drag-and-drop accounting relationship changes.</li>
+                <li>Standard access rights, domains, and company context remain applicable.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="text-center">Compatibility</h2>
+
+            <div style="
+                    max-width: 650px;
+                    margin: 20px auto;
+                    text-align: center;
+                    font-size: 18px;
+                    line-height: 2;">
+                <strong>Odoo 17.0</strong><br/>
+                <strong>Odoo 18.0</strong><br/>
+                <strong>Odoo 19.0</strong>
+            </div>
+
+            <p style="text-align: center; font-size: 16px;">
+                Use the corresponding repository branch for your Odoo version.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="text-center">Dependencies</h2>
+
+            <div style="text-align: center; font-size: 18px; line-height: 1.8;">
+                <code>account</code><br/>
+                <code>web_hierarchy</code>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12 text-center">
+            <h2>Chart of Accounts Hierarchy</h2>
+
+            <p style="font-size: 18px; line-height: 1.7;">
+                A focused, lightweight extension for easier Chart of Accounts
+                navigation and visualization.
+            </p>
+
+            <p style="margin-top: 25px;">
+                <strong>Author:</strong> Gadeer Mahmoud
+            </p>
+
+            <p>
+                <strong>License:</strong> LGPL-3.0
+            </p>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>
