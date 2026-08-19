@@ -14,6 +14,9 @@
     "data": [
         "views/account_account_views.xml",
     ],
+    "images": [
+        "static/description/cover.png",
+    ],
     "assets": {
         "web.assets_backend": [
             "account_coa_hierarchy/static/src/views/account_coa_hierarchy/**/*",
