@@ -18,7 +18,7 @@
         "static/description/cover.png",
     ],
     "assets": {
-        "web.assets_backend": [
+        "web.assets_backend_lazy": [
             "account_coa_hierarchy/static/src/views/account_coa_hierarchy/**/*",
         ],
         "web.assets_unit_tests": [
