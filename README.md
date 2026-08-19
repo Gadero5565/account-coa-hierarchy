@@ -1,37 +1,59 @@
-# Chart of Accounts Hierarchy for Odoo
+# Chart of Accounts Hierarchy
 
 A native hierarchy view for the Odoo Chart of Accounts.
 
-The module adds an optional **Hierarchy** view to the standard Chart of Accounts and groups accounts by their account type.
+This module adds an optional **Hierarchy** view to the standard Chart of Accounts and groups accounts visually by account type while preserving Odoo's normal accounting workflow and standard views.
 
-The normal Odoo Chart of Accounts behavior remains unchanged: the List view stays the default view, while Hierarchy is added as an additional view.
+## Overview
 
-## Supported Version
+Large Charts of Accounts can become difficult to navigate when all accounts are presented only as a flat list.
 
-- Odoo 19.0
+**Chart of Accounts Hierarchy** adds a visual hierarchy that groups real `account.account` records under their corresponding account types.
 
-Support for older Odoo versions may be added later.
+The hierarchy is an additional view only. It does not replace the standard Chart of Accounts views and does not modify accounting relationships.
 
 ## Features
 
-- Native Odoo `web_hierarchy` integration
-- Account Type → Account hierarchy
+- Native Odoo hierarchy experience
+- Account Type → Account structure
 - Fold and unfold account types
 - Open real `account.account` records directly from the hierarchy
 - Standard Chart of Accounts search support
-- Standard filters and search panel support
-- Multi-company support
-- Company-dependent account codes
-- Inactive account support
+- Standard filter support
+- Multi-company compatible
+- Account visibility follows the supported Odoo version's standard behavior
 - Lazy loading of account records
-- No changes to accounting data or account relationships
-- No drag-and-drop accounting changes
+- No fake accounting records
+- No drag-and-drop accounting relationship changes
 - Backend regression tests
-- Frontend HOOT regression tests
+- Frontend regression tests
+- Preserves the standard Chart of Accounts default view
+
+## Supported Versions
+
+Stable implementations are available for:
+
+- Odoo 17.0
+- Odoo 18.0
+- Odoo 19.0
+
+Use the repository branch matching your Odoo version.
+
+## Repository Branches
+
+- `17.0` → Odoo 17
+- `18.0` → Odoo 18
+- `19.0` → Odoo 19
+
+Repository:
+
+```text
+https://github.com/Gadero5565/account-coa-hierarchy
+```
 
 ## Hierarchy Structure
 
-The current hierarchy contains two levels:
+The hierarchy contains two visual levels:
 
 ```text
 Account Type
@@ -56,46 +78,50 @@ Expenses
 
 Account Type nodes are virtual hierarchy nodes used only for visualization.
 
-The accounts below them are real `account.account` records.
-
-## Screenshot
-
-![Chart of Accounts Hierarchy](docs/images/account-coa-hierarchy.png)
+The child nodes are real `account.account` records.
 
 ## Odoo Integration
 
-The module extends the existing Chart of Accounts action.
+The module extends the standard Chart of Accounts action and adds **Hierarchy** as an additional view.
 
-Default Odoo behavior:
+The normal Odoo List/Tree view remains the default view, depending on the Odoo version.
 
-```text
-List
-Kanban
-Form
-```
+The standard accounting workflow is preserved.
 
-With this module:
+## Search and Filters
 
-```text
-List
-Kanban
-Form
-Hierarchy
-```
+The hierarchy follows the active Chart of Accounts search domain.
 
-The List view remains the default.
+Standard searches and filters continue to work, including account-type filters, account searches, accounts with entries, and account visibility filters supported by the installed Odoo version.
+
+Odoo versions differ slightly in how deprecated or inactive accounts are represented, and each branch follows the standard behavior of its corresponding Odoo version.
+
+## Multi-Company
+
+The hierarchy respects Odoo's normal company context, account visibility rules, access rights, and search domains.
+
+Version-specific account-code behavior is handled by the corresponding branch implementation.
 
 ## Technical Approach
 
-Odoo's standard hierarchy view expects a self-referencing model structure.
+Odoo's hierarchy view expects a self-referencing model structure.
 
-However, `account.account.account_type` is a Selection field rather than a parent model.
+However, the Chart of Accounts uses `account_type` as a field rather than a parent model.
 
-This module keeps `account.account` as the actual hierarchy model and creates virtual Account Type nodes in the custom hierarchy model.
+This module keeps `account.account` as the real hierarchy model and creates virtual Account Type roots for visualization.
 
-Real account records are lazy-loaded when an Account Type is unfolded.
+When an Account Type is unfolded, the corresponding real account records are loaded and displayed beneath it.
 
-This allows the module to reuse Odoo's native `web_hierarchy` infrastructure without creating fake accounting records.
+This approach allows the module to reuse Odoo's native hierarchy infrastructure without creating fake accounting records or modifying accounting relationships.
+
+## Dependencies
+
+The module depends on:
+
+```text
+account
+web_hierarchy
+```
 
 ## Installation
 
@@ -105,13 +131,33 @@ Clone the repository:
 git clone https://github.com/Gadero5565/account-coa-hierarchy.git
 ```
 
-The actual Odoo addon is located at:
+Checkout the branch matching your Odoo version.
 
-```text
-account_coa_hierarchy/account_coa_hierarchy/
+For Odoo 19:
+
+```bash
+git checkout 19.0
 ```
 
-Make sure the parent directory is available in your Odoo addons path.
+For Odoo 18:
+
+```bash
+git checkout 18.0
+```
+
+For Odoo 17:
+
+```bash
+git checkout 17.0
+```
+
+The Odoo addon is located at:
+
+```text
+account_coa_hierarchy/
+```
+
+Make sure the **repository root** is included in your Odoo `addons_path`.
 
 Then update the Apps list and install:
 
@@ -125,11 +171,6 @@ Technical module name:
 account_coa_hierarchy
 ```
 
-## Dependencies
-
-- `account`
-- `web_hierarchy`
-
 ## Usage
 
 Open:
@@ -138,86 +179,76 @@ Open:
 Accounting → Configuration → Chart of Accounts
 ```
 
-Then select the **Hierarchy** view from the view switcher.
+Select the **Hierarchy** view from the view switcher.
 
-Account Type cards can be folded and unfolded.
+You can then:
 
-Clicking an account card opens the normal Odoo account form.
+- Browse accounts by Account Type
+- Fold and unfold Account Type nodes
+- Search accounts
+- Apply standard Chart of Accounts filters
+- Click a real account card to open the standard Odoo account form
 
-## Multi-Company
+## Screenshots
 
-The hierarchy follows the same account visibility, company context, domains, and access rules as the standard Chart of Accounts.
+### Hierarchy Overview
 
-Odoo 19 company-dependent account codes are supported through Odoo's standard account code placeholder behavior.
+![Chart of Accounts Hierarchy Overview](docs/images/account-coa-hierarchy.png)
 
-## Inactive Accounts
+Additional screenshots are available in the module's Odoo Apps description under:
 
-The standard **Inactive Accounts** filter is supported.
-
-Inactive accounts are correctly lazy-loaded when their Account Type is unfolded.
+```text
+account_coa_hierarchy/static/description/
+```
 
 ## Tests
 
-### Backend Tests
+The module includes backend and frontend regression tests adapted to each supported Odoo version.
 
-Run:
-
-```bash
-python odoo-bin \
-    -c /path/to/odoo.conf \
-    -d DATABASE_NAME \
-    -u account_coa_hierarchy \
-    --test-tags="/account_coa_hierarchy" \
-    --stop-after-init \
-    --log-level=test
-```
-
-The backend suite covers:
+The test suites cover important behaviors such as:
 
 - Account Type grouping
 - Domain filtering
-- Empty Account Type handling
 - Virtual hierarchy roots
-- Inactive accounts
-- Default active account behavior
+- Account visibility behavior
 - Preservation of the standard Chart of Accounts default view
-
-### Frontend Tests
-
-Odoo HOOT tests are available through:
-
-```text
-/web/tests
-```
-
-The frontend suite covers:
-
-- Active account unfolding
-- Inactive account unfolding
-- Hierarchy reload after search-domain changes
+- Fold and unfold behavior
+- Search-domain changes
 - Virtual Account Type navigation
 - Real account record navigation
 
-## Current Status
+## Version Notes
 
-Odoo 19 implementation is functionally complete and being prepared for its first stable release.
+Some implementation details differ between Odoo versions because the underlying Odoo APIs changed.
 
-## Roadmap
+Examples include:
 
-Possible future improvements include:
+- List vs Tree naming in the standard Chart of Accounts action
+- Account company fields
+- Account code behavior
+- Deprecated / inactive account handling
+- Frontend test framework and hierarchy APIs
 
-- Odoo 18 support
-- Odoo 17 support
-- Odoo 16 investigation
-- Optional Account Group hierarchy level
-- Additional account hierarchy visualization options
+Each supported branch contains the implementation appropriate for that Odoo version while keeping the user-facing behavior consistent.
+
+## Status
+
+Stable implementations are available for Odoo 17, Odoo 18, and Odoo 19.
 
 ## License
 
 GNU Lesser General Public License v3.0 — LGPL-3.0.
+
+See the repository `LICENSE` file for the full license text.
 
 ## Author
 
 **Gadeer Mahmoud**
 
 GitHub: `Gadero5565`
+
+Repository:
+
+```text
+https://github.com/Gadero5565/account-coa-hierarchy
+```
